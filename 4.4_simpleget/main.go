@@ -19,5 +19,6 @@ func main() {
 	log.Println(string(body))
 	log.Println("Status:", resp.Status)
 	log.Println("StatusCode:", resp.StatusCode)
-	log.Println("Header:", resp.Header)
+	log.Println("Fields:", resp.Header)
+	log.Println("Content-Length:", resp.Header.Get("Content-Length"))
 }
