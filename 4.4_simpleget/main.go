@@ -31,7 +31,7 @@ func main_4_4() {
 }
 
 // 4.5 GETメソッド・クエリーの送信
-func main() {
+func main_4_5() {
 	values := url.Values{
 		"query": {"hello world"},
 	}
@@ -39,4 +39,14 @@ func main() {
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
 	log.Println(string(body))
+}
+
+// 4.6 HEADメソッドの送信
+func main() {
+	resp, err := http.Head("http://localhost:18888")
+	if err != nil {
+		panic(err)
+	}
+	log.Println("Status:", resp.Status)
+	log.Println("Headers:", resp.Header)
 }
