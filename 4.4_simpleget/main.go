@@ -42,11 +42,25 @@ func main_4_5() {
 }
 
 // 4.6 HEADメソッドの送信
-func main() {
+// `curl --head http://localhost:18888`
+func main_4_6() {
 	resp, err := http.Head("http://localhost:18888")
 	if err != nil {
 		panic(err)
 	}
 	log.Println("Status:", resp.Status)
 	log.Println("Headers:", resp.Header)
+}
+
+// 4.7 POSTメソッドの送信（x-www-form-urlencoded形式）
+// `curl -d text-value http://localhost:18888`
+func main() {
+	values := url.Values{
+		"test": {"value"},
+	}
+	resp, err := http.PostForm("http://localhost:18888", values)
+	if err != nil {
+		panic(err)
+	}
+	log.Println("Status:", resp.Status)
 }
