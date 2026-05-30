@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
@@ -72,12 +74,52 @@ func main_4_7() {
 
 // 4.8 POSTメソッドで任意コンテンツを送信
 // `curl --data-binary @main.go -H "Content-Type: text/plain" http://localhost*18888`
-func main() {
+func main_4_8() {
 	file, err := os.Open("main.go")
 	if err != nil {
 		panic(err)
 	}
 	resp, err := http.Post("http://localhost:18888", "text/plain", file)
+	if err != nil {
+		panic(err)
+	}
+	log.Println("Status:", resp.Status)
+
+}
+
+// 4.9 multipart/form-data形式でファイルの送信
+// `curl -F "name=Michel Jackson" -F "thumbnail=@photo.png" http://localhost:18888`
+func main() {
+	// bytes.Bufferを作成（メモリのバッファ、出力先）
+	var buffer bytes.Buffer
+	// multipart.Writerを作成（bufferへの書き込み器）
+	writer := multipart.NewWriter(&buffer)
+
+	// テキストフィールドを書き込む（"name"というパラメータ）
+	writer.WriteField("name", "Michel Jackson")
+
+	// ファイルフィールド用のライタを作成（"thumbnail"という名前でphoto.pngというファイル名）
+	fileWriter, err := writer.CreateFormFile("thumbnail", "photo.png")
+	if err != nil {
+		panic(err)
+	}
+
+	// ファイル内容を読み込む
+	readFile, err := os.Open("photo.png")
+	if err != nil {
+		panic(err)
+	}
+	defer readFile.Close()
+
+	// ファイル内容をfileWriterにコピー（writerを通じてbufferに書き込まれる）
+	io.Copy(fileWriter, readFile)
+
+	// multipartデータの作成を完了（final boundaryを書き込む）
+	writer.Close()
+
+	// bufferの中身をPOSTリクエストとして送信
+	// FormDataContentType()は "multipart/form-data; boundary=..." を返す
+	resp, err := http.Post("http://localhost:18888", writer.FormDataContentType(), &buffer)
 	if err != nil {
 		panic(err)
 	}
