@@ -6,6 +6,8 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"net/http/cookiejar"
+	"net/http/httputil"
 	"net/textproto"
 	"net/url"
 	"os"
@@ -129,7 +131,7 @@ func main_4_9() {
 }
 
 // 4.9.1 MIMEタイプを指定する
-func main() {
+func main_4_9_1() {
 	// bytes.Bufferを作成（メモリのバッファ、出力先）
 	var buffer bytes.Buffer
 	// multipart.Writerを作成（bufferへの書き込み器）
@@ -169,5 +171,24 @@ func main() {
 }
 
 func main() {
-
+	// クッキーを保存するためのCookieJarのインスタンスを作成
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		panic(err)
+	}
+	client := http.Client{
+		Jar: jar,
+	}
+	// 初回アクセスでクッキーを受信し、2回目以降のアクセスでクッキーをサーバーに対して送信する仕組みなので2回アクセス
+	for i := 0; i < 2; i++ {
+		resp, err := client.Get("http://localhost:18888/cookie")
+		if err != nil {
+			panic(err)
+		}
+		dump, err := httputil.DumpResponse(resp, true)
+		if err != nil {
+			panic(err)
+		}
+		log.Println(string(dump))
+	}
 }
