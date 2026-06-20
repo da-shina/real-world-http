@@ -6,6 +6,7 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"net/url"
 	"os"
 )
@@ -89,7 +90,7 @@ func main_4_8() {
 
 // 4.9 multipart/form-data形式でファイルの送信
 // `curl -F "name=Michel Jackson" -F "thumbnail=@photo.png" http://localhost:18888`
-func main() {
+func main_4_9() {
 	// bytes.Bufferを作成（メモリのバッファ、出力先）
 	var buffer bytes.Buffer
 	// multipart.Writerを作成（bufferへの書き込み器）
@@ -124,5 +125,49 @@ func main() {
 		panic(err)
 	}
 	log.Println("Status:", resp.Status)
+
+}
+
+// 4.9.1 MIMEタイプを指定する
+func main() {
+	// bytes.Bufferを作成（メモリのバッファ、出力先）
+	var buffer bytes.Buffer
+	// multipart.Writerを作成（bufferへの書き込み器）
+	writer := multipart.NewWriter(&buffer)
+
+	// テキストフィールドを書き込む（"name"というパラメータ）
+	writer.WriteField("name", "Michel Jackson")
+
+	// MIMEタイプとContent-Dispositionヘッダーを設定するためのMIMEHeaderを作成
+	part := make(textproto.MIMEHeader)
+	part.Set("Content-Type", "image/jpeg")
+	part.Set("Content-Disposition", "form-data; name=\"thumbnail\"; filename=\"photo.png\"")
+	// partヘッダーを使用して、multipartリクエストに新しいパート（ファイルデータ）を作成
+	fileWriter, err := writer.CreatePart(part)
+	if err != nil {
+		panic(err)
+	}
+	readFile, err := os.Open("photo.png")
+	if err != nil {
+		panic(err)
+	}
+	defer readFile.Close()
+
+	// ファイルの全コンテンツを、ファイルの書き込み用io.Writerにコピーします
+	io.Copy(fileWriter, readFile)
+
+	// multipartデータの作成を完了（final boundaryをバッファに書き込む）
+	writer.Close()
+
+	// bufferの中身をPOSTリクエストとして送信
+	// FormDataContentType()は "multipart/form-data; boundary=..." を返す
+	resp, err := http.Post("http://localhost:18888", writer.FormDataContentType(), &buffer)
+	if err != nil {
+		panic(err)
+	}
+	log.Println("Status:", resp.Status)
+}
+
+func main() {
 
 }
