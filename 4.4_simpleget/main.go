@@ -170,7 +170,7 @@ func main_4_9_1() {
 	log.Println("Status:", resp.Status)
 }
 
-func main() {
+func main_4_10() {
 	// クッキーを保存するためのCookieJarのインスタンスを作成
 	jar, err := cookiejar.New(nil)
 	if err != nil {
@@ -191,4 +191,32 @@ func main() {
 		}
 		log.Println(string(dump))
 	}
+}
+
+// 4.11 プロキシの利用
+// `curl  -x http://localhost:18888 http://github.com` 同等のプログラム
+func main() {
+	proxyUrl, err := url.Parse("http://localhost:18888")
+	if err != nil {
+		panic(err)
+	}
+	// & アンパサンド
+	// 	1.	http.Transport という構造体の実体をメモリ上に新しく作成する
+	// 2.	作成した実体のポインタを指し示す
+
+	client := http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyURL(proxyUrl),
+		},
+	}
+
+	resp, err := client.Get("hdttp://github.com")
+	if err != nil {
+		panic(err)
+	}
+	dump, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		panic(err)
+	}
+	log.Println(string(dump))
 }
