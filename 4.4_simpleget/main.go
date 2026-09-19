@@ -224,13 +224,32 @@ func main_4_11() {
 
 // 4.12 ファイルシステムへのアクセス
 // `curl file://main.go`
-func main() {
+func main_4_12() {
 	transport := &http.Transport{}
 	transport.RegisterProtocol("file", http.NewFileTransport(http.Dir(".")))
 	client := http.Client{
 		Transport: transport,
 	}
 	resp, err := client.Get("file://./go.mod")
+	if err != nil {
+		panic(err)
+	}
+	dump, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		panic(err)
+	}
+	log.Println(string(dump))
+}
+
+// 4.13 自由なメソッドの送信
+// `curl -X DELETE http://localhost:18888`
+func main() {
+	client := &http.Client{}
+	request, err := http.NewRequest("DELETE", "http://localhost:18888", nil)
+	if err != nil {
+		panic(err)
+	}
+	resp, err := client.Do(request)
 	if err != nil {
 		panic(err)
 	}
