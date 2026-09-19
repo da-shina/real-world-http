@@ -170,6 +170,7 @@ func main_4_9_1() {
 	log.Println("Status:", resp.Status)
 }
 
+// 4.10 クッキーの送受信
 func main_4_10() {
 	// クッキーを保存するためのCookieJarのインスタンスを作成
 	jar, err := cookiejar.New(nil)
@@ -195,7 +196,7 @@ func main_4_10() {
 
 // 4.11 プロキシの利用
 // `curl  -x http://localhost:18888 http://github.com` 同等のプログラム
-func main() {
+func main_4_11() {
 	proxyUrl, err := url.Parse("http://localhost:18888")
 	if err != nil {
 		panic(err)
@@ -211,6 +212,25 @@ func main() {
 	}
 
 	resp, err := client.Get("http://github.com")
+	if err != nil {
+		panic(err)
+	}
+	dump, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		panic(err)
+	}
+	log.Println(string(dump))
+}
+
+// 4.12 ファイルシステムへのアクセス
+// `curl file://main.go`
+func main() {
+	transport := &http.Transport{}
+	transport.RegisterProtocol("file", http.NewFileTransport(http.Dir(".")))
+	client := http.Client{
+		Transport: transport,
+	}
+	resp, err := client.Get("file://./go.mod")
 	if err != nil {
 		panic(err)
 	}
