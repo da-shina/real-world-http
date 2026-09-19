@@ -11,6 +11,8 @@ import (
 	"net/textproto"
 	"net/url"
 	"os"
+	"fmt"
+	"golang.org/x/net/idna"
 )
 
 // 4.4 GETメソッドの送信とコンテンツ、ステータス、フィールドの表示
@@ -243,7 +245,7 @@ func main_4_12() {
 
 // 4.13 自由なメソッドの送信
 // `curl -X DELETE http://localhost:18888`
-func main() {
+func main_4_13() {
 	client := &http.Client{}
 	request, err := http.NewRequest("DELETE", "http://localhost:18888", nil)
 	if err != nil {
@@ -258,4 +260,14 @@ func main() {
 		panic(err)
 	}
 	log.Println(string(dump))
+}
+
+// 4.15 国際化ドメイン
+func main() {
+	src := "握力王"
+	ascii, err := idna.ToASCII(src)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s -> %s\n", src, ascii)
 }
