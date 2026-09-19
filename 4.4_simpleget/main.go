@@ -210,7 +210,7 @@ func main() {
 		},
 	}
 
-	resp, err := client.Get("hdttp://github.com")
+	resp, err := client.Get("http://github.com")
 	if err != nil {
 		panic(err)
 	}
